@@ -1,0 +1,23 @@
+body {
+  background-color: beige;
+}
+h1 {
+  color: blue;
+  font-style: italic;
+  text-align: center;
+}
+.images {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  justify-content: space-between;
+}
+.images img {
+  width: 400px;
+}
+
+ul.squared li {
+  list-style-type: square;
+  padding: 0;
+}

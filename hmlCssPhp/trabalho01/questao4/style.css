@@ -1,0 +1,16 @@
+h1 {
+  font-size: 30px;
+}
+
+p.green-text {
+  color: green;
+}
+
+p.red-text {
+  color: red;
+}
+
+p.red-text span {
+  color: blue;
+  font-size: 30px;
+}

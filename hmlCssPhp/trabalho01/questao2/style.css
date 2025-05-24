@@ -1,0 +1,9 @@
+h1 {
+  text-align: center;
+}
+
+p {
+  span {
+    margin-left: 30px;
+  }
+}

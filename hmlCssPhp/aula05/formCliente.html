@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Aula 05</title>
+</head>
+<body>
+  <h2>Formulario de cadastro de clientes</h2>
+  <form method="post">
+    <div class="form-group">
+      <label>Nome: </label>
+      <input type="text" name="nome" id="nome" required>
+    </div>
+    <div class="form-group">
+      <label>Email: </label>
+      <input type="email" name="email" id="email" required>
+    </div>
+    <div class="form-group radio">
+      <p>Sexo</p>
+      <label>
+        <input type="radio" name="sexo" id="sexo" value="masculino" />
+        <span>Masculino</span>
+      </label>
+      <label>
+        <input type="radio" name="sexo" id="sexo" value="feminino" /> 
+        <span>Feminino</span>
+      </label>
+      <label>
+        <input type="radio" name="sexo" id="sexo" value="outros" /> 
+        <span>Outro</span>
+      </label>
+    </div>
+    <div class="form-group check">
+      <p>Preferências</p>
+      <label>
+        <input type="checkbox" name="preferencias" value="crua" />
+        <span>Crua</span>
+      </label>
+      <label>
+        <input type="checkbox" name="preferencias" value="crua" />
+        <span>Cozida</span>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Bairro</label>
+      <select name="Bairro" id="bairro">
+        <option value="jurema">Jurema</option>
+        <option value="araturi">Araturi</option>
+        <option value="pirambu">Pirambu</option>
+        <option value="altoDoBode">Alto do bode</option>
+        <option value="altoDaBalanca">Alto da balança</option>
+      </select>
+    </div>
+  </form>
+</body>
+</html>

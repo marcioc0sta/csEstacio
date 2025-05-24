@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Aula 05</title>
+</head>
+<body>
+  <h2>Adicionar produto</h2>
+  <form method="post" action="">
+    <div class="form-group">
+      <label>Produto: </label>
+      <input type="text" name="produto" id="produto" required>
+    </div>
+    <div class="form-group">
+      <label>Preço: </label>
+      <input type="number" step="0.01" name="preco" id="preco" required>
+    </div>
+    <div class="form-group">
+      <label>Descrição: </label>
+      <textarea name="descricao" id="descricao" required></textarea>
+    </div>
+    <div class="form-group">
+      <button type="submit">Adicionar</button>
+      <a href="main.html" class="back">Voltar</a>
+    </div>
+  </form>
+</body>
+</html>

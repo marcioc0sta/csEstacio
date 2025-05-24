@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <title>Aula 06</title>
+</head>
+<body>
+  <h2>Validação JS</h2>
+  <form method="post" onsubmit="return ValidateCep()">
+    <div class="form-group">
+      <label>CEP: </label>
+      <input oninput="clearInputs()" type="text" id="cep" name="cep" required>
+      <small id="hint" >Cep inválido</small>
+    </div>
+    <div class="form-group">
+      <label>Rua: </label>
+      <input type="text" id="rua" name="rua" disabled>
+    </div>
+    <div class="form-group">
+      <label>Complemento: </label>
+      <input type="text" id="complemento" name="complemento" disabled>
+    </div>
+    <div class="form-group">
+      <label>Bairro: </label>
+      <input type="text" id="bairro" name="bairro" disabled>
+    </div>
+    <div class="form-group">
+      <label>Cidade: </label>
+      <input type="text" id="cidade" name="cidade" disabled>
+    </div>
+    <div class="form-group">
+      <label>Estado: </label>
+      <input type="text" id="estado" name="estado" disabled>
+    </div>
+    <div class="form-group">
+      <button type="submit">Enviar</button>
+    </div>
+  </form>
+  <script src="js/cepValidator.js"></script>
+</body>
+</html>
