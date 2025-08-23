@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 struct Territorio
 {
   char nome [30];
@@ -7,7 +8,7 @@ struct Territorio
   int tropas;
 };
 
-void criarTerritorios(struct Territorio territorios[]){
+void criarTerritorios(struct Territorio territorios[], int numeroDeTerritorios){
   int i = 0;
   do 
   {
@@ -26,11 +27,11 @@ void criarTerritorios(struct Territorio territorios[]){
 
     printf("--------------------------------\n");
     i++;
-  } while (i < 5);
+  } while (i < numeroDeTerritorios);
 }
 
-void printarTerritorios(struct Territorio territorios[]){
-  for (int i = 0; i < 5; i++)
+void printarTerritorios(struct Territorio territorios[], int numeroDeTerritorios){
+  for (int i = 0; i < numeroDeTerritorios; i++)
   {
     printf("--------------------------------\n -- Territorio %d --\n--------------------------------\n", i + 1);
     printf("Nome: %s\n", territorios[i].nome);
@@ -40,11 +41,25 @@ void printarTerritorios(struct Territorio territorios[]){
   printf("--------------------------------\n");
 }
 
+int criaNumeroDeTerritorios(){
+  int numeroDeTerritorios;
+  printf("Digite o numero de territorios: ");
+  scanf("%d", &numeroDeTerritorios);
+  getchar();
+  return numeroDeTerritorios;
+}
+
 int main(){
-  struct Territorio territorios[5];
+  // Criando o numero de territorios
+  int numeroDeTerritorios = criaNumeroDeTerritorios();
 
-  criarTerritorios(territorios);
-  printarTerritorios(territorios);
+  // Criando o array de territorios
+  struct Territorio *territorio = malloc(numeroDeTerritorios * sizeof(struct Territorio));
 
+  // Criando os territorios
+  criarTerritorios(territorio, numeroDeTerritorios);
+  printarTerritorios(territorio, numeroDeTerritorios);
+
+  free(territorio);
   return 0;
 }
