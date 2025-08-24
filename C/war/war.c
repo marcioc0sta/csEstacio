@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 struct Territorio
 {
   char nome [30];
@@ -16,12 +17,13 @@ struct Missoes {
   int territorios;
 };
 
-// Function prototypes
-void loopDeAtaques(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual);
-int menuPrincipal(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual);
+// Prototipos
+int loopDeAtaques(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual, int indiceTerritorioJogador);
+int menuPrincipal(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual, int indiceTerritorioJogador);
 void exibirMissao(struct Missoes missao);
-int verificarMissaoCompleta(struct Missoes missao, struct Territorio* territorios, int numeroDeTerritorios, char* corJogador);
+int verificarMissaoCompleta(struct Missoes missao, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador);
 void parabenizarJogador(struct Missoes missao);
+struct Missoes sortearMissao(struct Missoes* missoes, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador);
 
 void criarTerritorios(struct Territorio territorios[], int numeroDeTerritorios){
   int i = 0;
@@ -43,6 +45,26 @@ void criarTerritorios(struct Territorio territorios[], int numeroDeTerritorios){
     printf("--------------------------------\n");
     i++;
   } while (i < numeroDeTerritorios);
+}
+
+int selecionarTerritorioJogador(struct Territorio territorios[], int numeroDeTerritorios){
+  printf("--------------------------------\n");
+  printf("SELECIONE SEU TERRITORIO INICIAL:\n");
+  printf("--------------------------------\n");
+  
+  for (int i = 0; i < numeroDeTerritorios; i++) {
+    printf("%d. %s (%s) - %d tropas\n", i + 1, territorios[i].nome, territorios[i].cor, territorios[i].tropas);
+  }
+  
+  int escolha;
+  do {
+    printf("Escolha o numero do seu territorio (1-%d): ", numeroDeTerritorios);
+    scanf("%d", &escolha);
+    getchar();
+  } while (escolha < 1 || escolha > numeroDeTerritorios);
+  
+  printf("Voce escolheu: %s\n", territorios[escolha - 1].nome);
+  return escolha - 1; // Retorna o indice do territorio escolhido
 }
 
 void printarTerritorios(struct Territorio territorios[], int numeroDeTerritorios){
@@ -86,7 +108,7 @@ void exibirResultadoDoAtaque(struct Territorio* atacante, struct Territorio* def
   printf("--------------------------------\n");
 }
 
-void atacarTerritorio(struct Territorio* territorios, int numeroDeTerritorios, int indiceAtacante, int indiceDefensor, struct Missoes missaoAtual){
+void atacarTerritorio(struct Territorio* territorios, int numeroDeTerritorios, int indiceAtacante, int indiceDefensor, struct Missoes missaoAtual, int indiceTerritorioJogador){
   struct Territorio* atacante = &territorios[indiceAtacante];
   struct Territorio* defensor = &territorios[indiceDefensor];
   
@@ -106,6 +128,11 @@ void atacarTerritorio(struct Territorio* territorios, int numeroDeTerritorios, i
       defensor->tropas = 1;
       atacante->tropas = atacante->tropas - 1;
       printarTerritorios(territorios, numeroDeTerritorios);
+      
+      // Verifica se a missao foi completada APENAS quando conquista um territorio
+      if (verificarMissaoCompleta(missaoAtual, territorios, numeroDeTerritorios, indiceTerritorioJogador)) {
+        parabenizarJogador(missaoAtual);
+      }
       return;
     }
   } else {
@@ -118,19 +145,19 @@ void atacarTerritorio(struct Territorio* territorios, int numeroDeTerritorios, i
       atacante->tropas = 1;
       defensor->tropas = defensor->tropas - 1;
       printarTerritorios(territorios, numeroDeTerritorios);
+      
+      // Verifica se a missao foi completada APENAS quando conquista um territorio
+      if (verificarMissaoCompleta(missaoAtual, territorios, numeroDeTerritorios, indiceTerritorioJogador)) {
+        parabenizarJogador(missaoAtual);
+      }
       return;
     }
   }
 
   exibirResultadoDoAtaque(atacante, defensor, dadosDoAtacante, dadosDoDefensor);
-  
-  // Verifica se a missao foi completada
-  if (verificarMissaoCompleta(missaoAtual, territorios, numeroDeTerritorios, atacante->cor)) {
-    parabenizarJogador(missaoAtual);
-  }
 }
 
-int executarAtaque(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual) {
+int executarAtaque(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual, int indiceTerritorioJogador) {
   printf("Digite o nome do territorio atacante (ou 'sair' para sair, 'parar' para parar ataques): ");
   char nomeAtacante[30];
   scanf(" %[^\n]s", nomeAtacante);
@@ -178,7 +205,7 @@ int executarAtaque(struct Territorio* territorios, int numeroDeTerritorios, stru
     return 0; // Continuar
   }
   
-  atacarTerritorio(territorios, numeroDeTerritorios, indiceAtacante, indiceDefensor, missaoAtual);
+  atacarTerritorio(territorios, numeroDeTerritorios, indiceAtacante, indiceDefensor, missaoAtual, indiceTerritorioJogador);
   return 0; // Continuar
 }
 
@@ -218,9 +245,44 @@ struct Missoes* criarMissoes() {
   return missoes;
 }
 
-struct Missoes sortearMissao(struct Missoes* missoes) {
-  int indice = rand() % 5;
-  return missoes[indice];
+struct Missoes sortearMissao(struct Missoes* missoes, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador) {
+  // Cria uma lista de missoes validas (que nao envolvem o territorio do jogador)
+  struct Missoes* missoesValidas = malloc(5 * sizeof(struct Missoes));
+  int numMissoesValidas = 0;
+  
+  char* nomeTerritorioJogador = territorios[indiceTerritorioJogador].nome;
+  
+  for (int i = 0; i < 5; i++) {
+    // Verifica se a missao e valida (nao envolve o territorio do jogador)
+    // Converte para maiusculas para comparacao case-insensitive
+    char missaoUpper[100];
+    char territorioUpper[30];
+    strcpy(missaoUpper, missoes[i].nome);
+    strcpy(territorioUpper, nomeTerritorioJogador);
+    
+    // Converte para maiusculas
+    for (int j = 0; missaoUpper[j]; j++) missaoUpper[j] = toupper(missaoUpper[j]);
+    for (int j = 0; territorioUpper[j]; j++) territorioUpper[j] = toupper(territorioUpper[j]);
+    
+    if (strstr(missaoUpper, territorioUpper) == NULL) {
+      missoesValidas[numMissoesValidas] = missoes[i];
+      numMissoesValidas++;
+    }
+  }
+  
+  // Se nao ha missoes validas, usa missoes de conquista genericas
+  if (numMissoesValidas == 0) {
+    free(missoesValidas);
+    // Retorna uma missao de conquista generica
+    return missoes[0]; // Conquistar 1 territorio
+  }
+  
+  // Sorteia uma missao valida
+  int indice = rand() % numMissoesValidas;
+  struct Missoes missaoEscolhida = missoesValidas[indice];
+  free(missoesValidas);
+  
+  return missaoEscolhida;
 }
 
 void exibirMissao(struct Missoes missao) {
@@ -231,12 +293,13 @@ void exibirMissao(struct Missoes missao) {
   printf("--------------------------------\n");
 }
 
-int verificarMissaoCompleta(struct Missoes missao, struct Territorio* territorios, int numeroDeTerritorios, char* corJogador) {
+int verificarMissaoCompleta(struct Missoes missao, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador) {
+  char* corJogador = territorios[indiceTerritorioJogador].cor;
   int territoriosConquistados = 0;
   
-  // Conta quantos territorios o jogador possui
+  // Conta quantos territorios o jogador possui (excluindo o territorio inicial)
   for (int i = 0; i < numeroDeTerritorios; i++) {
-    if (strcmp(territorios[i].cor, corJogador) == 0) {
+    if (i != indiceTerritorioJogador && strcmp(territorios[i].cor, corJogador) == 0) {
       territoriosConquistados++;
     }
   }
@@ -252,17 +315,19 @@ int verificarMissaoCompleta(struct Missoes missao, struct Territorio* territorio
     // Verifica se o territorio especifico foi conquistado
     char* territorioAlvo = NULL;
     if (strstr(missao.nome, "America") != NULL) {
-      territorioAlvo = "America";
+      territorioAlvo = "america";
     } else if (strstr(missao.nome, "Asia") != NULL) {
-      territorioAlvo = "Asia";
+      territorioAlvo = "asia";
     } else if (strstr(missao.nome, "Oceania") != NULL) {
-      territorioAlvo = "Oceania";
+      territorioAlvo = "oceania";
     }
     
     if (territorioAlvo != NULL) {
       for (int i = 0; i < numeroDeTerritorios; i++) {
+        // Verifica se o territorio alvo foi conquistado E nao e o territorio inicial do jogador
         if (strcmp(territorios[i].nome, territorioAlvo) == 0 && 
-            strcmp(territorios[i].cor, corJogador) == 0) {
+            strcmp(territorios[i].cor, corJogador) == 0 &&
+            i != indiceTerritorioJogador) {
           return 1;
         }
       }
@@ -280,51 +345,52 @@ void parabenizarJogador(struct Missoes missao) {
   printf("--------------------------------\n");
 }
 
-int menuPrincipal(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual) {
-  while (1) {
-    printf("\n=== MENU ===\n");
-    printf("1. Ver territorios\n");
-    printf("2. Continuar ataques\n");
-    printf("3. Ver missao atual\n");
-    printf("4. Sair do jogo\n");
-    printf("Escolha uma opcao: ");
-    
-    int opcao;
-    scanf("%d", &opcao);
-    getchar();
-    
-    switch (opcao) {
-      case 1:
-        printarTerritorios(territorios, numeroDeTerritorios);
-        break;
-      case 2:
-        printf("Retomando ataques...\n");
-        loopDeAtaques(territorios, numeroDeTerritorios, missaoAtual);
-        break;
-      case 3:
-        exibirMissao(missaoAtual);
-        break;
-      case 4:
-        printf("Saindo do jogo...\n");
-        return 1; // Indica que deve sair do jogo
-      default:
-        printf("Opcao invalida!\n");
-        break;
-    }
+int menuPrincipal(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual, int indiceTerritorioJogador) {
+  printf("\n=== MENU ===\n");
+  printf("1. Ver territorios\n");
+  printf("2. Continuar ataques\n");
+  printf("3. Ver missao atual\n");
+  printf("4. Sair do jogo\n");
+  printf("Escolha uma opcao: ");
+  
+  int opcao;
+  scanf("%d", &opcao);
+  getchar();
+  
+  switch (opcao) {
+    case 1:
+      printarTerritorios(territorios, numeroDeTerritorios);
+      return 0; // Continua o jogo
+    case 2:
+      printf("Retomando ataques...\n");
+      return loopDeAtaques(territorios, numeroDeTerritorios, missaoAtual, indiceTerritorioJogador);
+    case 3:
+      exibirMissao(missaoAtual);
+      return 0; // Continua o jogo
+    case 4:
+      printf("Saindo do jogo...\n");
+      return 1; // Indica que deve sair do jogo
+    default:
+      printf("Opcao invalida!\n");
+      return 0; // Continua o jogo
   }
-  return 0;
 }
 
-void loopDeAtaques(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual) {
+int loopDeAtaques(struct Territorio* territorios, int numeroDeTerritorios, struct Missoes missaoAtual, int indiceTerritorioJogador) {
   while (1) {
-    int resultado = executarAtaque(territorios, numeroDeTerritorios, missaoAtual);
+    int resultado = executarAtaque(territorios, numeroDeTerritorios, missaoAtual, indiceTerritorioJogador);
     if (resultado == 1 || resultado == 2) {
       break;
     }
     
     // Mostra o menu apos cada ataque
-    menuPrincipal(territorios, numeroDeTerritorios, missaoAtual);
+    int menuResultado = menuPrincipal(territorios, numeroDeTerritorios, missaoAtual, indiceTerritorioJogador);
+    if (menuResultado == 1) {
+      return 1; // Indica que deve sair do jogo
+    }
+    // Se o menu retornou 0, continua o loop de ataques
   }
+  return 0;
 }
 
 int main(){
@@ -340,21 +406,29 @@ int main(){
   // Criando os territorios
   criarTerritorios(territorio, numeroDeTerritorios);
 
+  // Selecionando o territorio do jogador
+  int indiceTerritorioJogador = selecionarTerritorioJogador(territorio, numeroDeTerritorios);
+
   // Criando e sorteando a missao
   struct Missoes* missoes = criarMissoes();
-  struct Missoes missaoAtual = sortearMissao(missoes);
+  struct Missoes missaoAtual = sortearMissao(missoes, territorio, numeroDeTerritorios, indiceTerritorioJogador);
   
   printf("Missao sorteada!\n");
   exibirMissao(missaoAtual);
   
   // Inicia o jogo
-  loopDeAtaques(territorio, numeroDeTerritorios, missaoAtual);
-  if (menuPrincipal(territorio, numeroDeTerritorios, missaoAtual) == 1) {
+  if (loopDeAtaques(territorio, numeroDeTerritorios, missaoAtual, indiceTerritorioJogador) == 1) {
     free(territorio);
     free(missoes);
     return 0;
   }
-  free(territorio);
-  free(missoes);
-  return 0;
+  
+  // Loop do menu principal
+  while (1) {
+    if (menuPrincipal(territorio, numeroDeTerritorios, missaoAtual, indiceTerritorioJogador) == 1) {
+      free(territorio);
+      free(missoes);
+      return 0;
+    }
+  }
 }
