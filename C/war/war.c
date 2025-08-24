@@ -23,7 +23,7 @@ int menuPrincipal(struct Territorio* territorios, int numeroDeTerritorios, struc
 void exibirMissao(struct Missoes missao);
 int verificarMissaoCompleta(struct Missoes missao, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador);
 void parabenizarJogador(struct Missoes missao);
-struct Missoes sortearMissao(struct Missoes* missoes, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador);
+struct Missoes sortearMissao(struct Missoes* missoes, struct Territorio* territorios, int indiceTerritorioJogador);
 
 void criarTerritorios(struct Territorio territorios[], int numeroDeTerritorios){
   int i = 0;
@@ -94,7 +94,6 @@ int encontrarTerritorioPorNome(struct Territorio* territorios, int numeroDeTerri
   }
   return -1; // Territorio nao encontrado
 }
-
 
 void exibirResultadoDoAtaque(struct Territorio* atacante, struct Territorio* defensor, int dadosDoAtacante, int dadosDoDefensor){
   printf("--------------------------------\n -- Resultado do Ataque --\n--------------------------------\n");
@@ -245,7 +244,7 @@ struct Missoes* criarMissoes() {
   return missoes;
 }
 
-struct Missoes sortearMissao(struct Missoes* missoes, struct Territorio* territorios, int numeroDeTerritorios, int indiceTerritorioJogador) {
+struct Missoes sortearMissao(struct Missoes* missoes, struct Territorio* territorios, int indiceTerritorioJogador) {
   // Cria uma lista de missoes validas (que nao envolvem o territorio do jogador)
   struct Missoes* missoesValidas = malloc(5 * sizeof(struct Missoes));
   int numMissoesValidas = 0;
@@ -411,7 +410,7 @@ int main(){
 
   // Criando e sorteando a missao
   struct Missoes* missoes = criarMissoes();
-  struct Missoes missaoAtual = sortearMissao(missoes, territorio, numeroDeTerritorios, indiceTerritorioJogador);
+  struct Missoes missaoAtual = sortearMissao(missoes, territorio, indiceTerritorioJogador);
   
   printf("Missao sorteada!\n");
   exibirMissao(missaoAtual);
