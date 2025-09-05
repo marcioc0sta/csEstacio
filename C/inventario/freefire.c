@@ -31,7 +31,12 @@ int main() {
     printf("4. Remover item\n");
     printf("5. Sair\n");
     printf("Escolha uma opção: ");
-    scanf("%d", &opcao);
+    if (scanf("%d", &opcao) != 1) {
+      printf("Entrada inválida! Digite um número.\n");
+      // Clear the input buffer
+      while (getchar() != '\n');
+      continue;
+    }
 
     switch (opcao) {
       case 1:
@@ -60,7 +65,9 @@ int main() {
       
       case 3:
         printf("Digite o nome do item a buscar: ");
-        scanf("%s", nomeBusca);
+        fgets(nomeBusca, sizeof(nomeBusca), stdin);
+        // Remove newline character
+        nomeBusca[strcspn(nomeBusca, "\n")] = 0;
         buscarItem(inventario, nomeBusca);
         break;
       
@@ -68,7 +75,12 @@ int main() {
         if (items > 0) {
           char nomeRemover[30];
           printf("Digite o nome do item a ser removido: ");
-          scanf("%s", nomeRemover);
+          // Clear any leftover newline from previous scanf
+          int c;
+          while ((c = getchar()) != '\n' && c != EOF);
+          fgets(nomeRemover, sizeof(nomeRemover), stdin);
+          // Remove newline character
+          nomeRemover[strcspn(nomeRemover, "\n")] = 0;
           
           int itemIndex = -1;
           for (int i = 0; i < QTY_MAX_ITEMS; i++) {
@@ -79,9 +91,22 @@ int main() {
           }
           
           if (itemIndex != -1) {
-            items -= inventario[itemIndex].quantidade;
-            inventario[itemIndex].quantidade = 0; // Mark as empty
-            printf("Item %s removido do inventário\n", nomeRemover);
+            printf("Item encontrado: %s (quantidade atual: %d)\n", inventario[itemIndex].nome, inventario[itemIndex].quantidade);
+            printf("Digite a quantidade a remover (0 para remover todos): ");
+            int quantidadeRemover;
+            scanf("%d", &quantidadeRemover);
+            
+            if (quantidadeRemover <= 0 || quantidadeRemover >= inventario[itemIndex].quantidade) {
+              // Remove all items
+              items -= inventario[itemIndex].quantidade;
+              inventario[itemIndex].quantidade = 0;
+              printf("Item %s removido completamente do inventário\n", nomeRemover);
+            } else {
+              // Remove partial quantity
+              inventario[itemIndex].quantidade -= quantidadeRemover;
+              items -= quantidadeRemover;
+              printf("Removidos %d unidades de %s (restam %d)\n", quantidadeRemover, nomeRemover, inventario[itemIndex].quantidade);
+            }
           } else {
             printf("Item não encontrado!\n");
           }
@@ -109,11 +134,22 @@ void cadastrarItem(struct item *item, int items) {
   }
 
   printf("Digite o nome do item: ");
-  scanf("%s", item->nome);
+  // Clear any leftover newline from previous scanf
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF);
+  fgets(item->nome, sizeof(item->nome), stdin);
+  // Remove newline character
+  item->nome[strcspn(item->nome, "\n")] = 0;
+  
   printf("Digite o tipo do item: ");
-  scanf("%s", item->tipo);
+  fgets(item->tipo, sizeof(item->tipo), stdin);
+  // Remove newline character
+  item->tipo[strcspn(item->tipo, "\n")] = 0;
+  
   printf("Digite a quantidade do item: ");
   scanf("%d", &item->quantidade);
+  // Clear the newline left by scanf
+  getchar();
 }
 
 void removerItem(struct item *item, int items) {
@@ -160,8 +196,12 @@ void listarItens(struct item *inventario, int items) {
 
 void buscarItem(struct item *inventario, char *nome) {
   for (int i = 0; i < QTY_MAX_ITEMS; i++) {
-    if (strcmp(inventario[i].nome, nome) == 0) {
-      printf("Item encontrado: %s - %s - %d\n", inventario[i].nome, inventario[i].tipo, inventario[i].quantidade);
+    if (inventario[i].quantidade > 0 && strcmp(inventario[i].nome, nome) == 0) {
+      printf("\n=== RESULTADO DA BUSCA ===\n");
+      printf("%-30s %-20s %-10s\n", "NOME", "TIPO", "QUANTIDADE");
+      printf("--------------------------------------------------------\n");
+      printf("%-30s %-20s %-10d\n", inventario[i].nome, inventario[i].tipo, inventario[i].quantidade);
+      printf("--------------------------------------------------------\n\n");
       return;
     }
   }
