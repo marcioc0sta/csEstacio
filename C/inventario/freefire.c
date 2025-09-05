@@ -17,11 +17,14 @@ void cadastrarItem(struct item *item, int items);
 void removerItem(struct item *item, int items);
 void listarItens(struct item *inventario, int items);
 void buscarItem(struct item *inventario, char *nome);
+void menuCadastrar(struct item *inventario, int *items);
+void menuListar(struct item *inventario, int items);
+void menuBuscar(struct item *inventario, int items);
+void menuRemover(struct item *inventario, int *items);
 
 int main() {
   int items = 0;
   int opcao;
-  char nomeBusca[30];
 
   do {
     printf("\n=== MENU DO INVENTÁRIO ===\n");
@@ -40,79 +43,19 @@ int main() {
 
     switch (opcao) {
       case 1:
-        if (items < QTY_MAX_ITEMS) {
-          int itemIndex = 0;
-          // Find the next empty slot
-          while (itemIndex < QTY_MAX_ITEMS && inventario[itemIndex].quantidade > 0) {
-            itemIndex++;
-          }
-          
-          if (itemIndex < QTY_MAX_ITEMS) {
-            cadastrarItem(&inventario[itemIndex], items);
-            items += inventario[itemIndex].quantidade;
-            printf("Item cadastrado com sucesso!\n");
-          } else {
-            printf("Limite de itens atingido!\n");
-          }
-        } else {
-          printf("Limite de itens atingido!\n");
-        }
+        menuCadastrar(inventario, &items);
         break;
       
       case 2:
-        listarItens(inventario, items);
+        menuListar(inventario, items);
         break;
       
       case 3:
-        printf("Digite o nome do item a buscar: ");
-        fgets(nomeBusca, sizeof(nomeBusca), stdin);
-        // Remove newline character
-        nomeBusca[strcspn(nomeBusca, "\n")] = 0;
-        buscarItem(inventario, nomeBusca);
+        menuBuscar(inventario, items);
         break;
       
       case 4:
-        if (items > 0) {
-          char nomeRemover[30];
-          printf("Digite o nome do item a ser removido: ");
-          // Clear any leftover newline from previous scanf
-          int c;
-          while ((c = getchar()) != '\n' && c != EOF);
-          fgets(nomeRemover, sizeof(nomeRemover), stdin);
-          // Remove newline character
-          nomeRemover[strcspn(nomeRemover, "\n")] = 0;
-          
-          int itemIndex = -1;
-          for (int i = 0; i < QTY_MAX_ITEMS; i++) {
-            if (inventario[i].quantidade > 0 && strcmp(inventario[i].nome, nomeRemover) == 0) {
-              itemIndex = i;
-              break;
-            }
-          }
-          
-          if (itemIndex != -1) {
-            printf("Item encontrado: %s (quantidade atual: %d)\n", inventario[itemIndex].nome, inventario[itemIndex].quantidade);
-            printf("Digite a quantidade a remover (0 para remover todos): ");
-            int quantidadeRemover;
-            scanf("%d", &quantidadeRemover);
-            
-            if (quantidadeRemover <= 0 || quantidadeRemover >= inventario[itemIndex].quantidade) {
-              // Remove all items
-              items -= inventario[itemIndex].quantidade;
-              inventario[itemIndex].quantidade = 0;
-              printf("Item %s removido completamente do inventário\n", nomeRemover);
-            } else {
-              // Remove partial quantity
-              inventario[itemIndex].quantidade -= quantidadeRemover;
-              items -= quantidadeRemover;
-              printf("Removidos %d unidades de %s (restam %d)\n", quantidadeRemover, nomeRemover, inventario[itemIndex].quantidade);
-            }
-          } else {
-            printf("Item não encontrado!\n");
-          }
-        } else {
-          printf("Nenhum item para remover!\n");
-        }
+        menuRemover(inventario, &items);
         break;
       
       case 5:
@@ -206,5 +149,85 @@ void buscarItem(struct item *inventario, char *nome) {
     }
   }
   printf("Item não encontrado\n");
+}
+
+void menuCadastrar(struct item *inventario, int *items) {
+  if (*items < QTY_MAX_ITEMS) {
+    int itemIndex = 0;
+    // Find the next empty slot
+    while (itemIndex < QTY_MAX_ITEMS && inventario[itemIndex].quantidade > 0) {
+      itemIndex++;
+    }
+    
+    if (itemIndex < QTY_MAX_ITEMS) {
+      cadastrarItem(&inventario[itemIndex], *items);
+      *items += inventario[itemIndex].quantidade;
+      printf("Item cadastrado com sucesso!\n");
+    } else {
+      printf("Limite de itens atingido!\n");
+    }
+  } else {
+    printf("Limite de itens atingido!\n");
+  }
+}
+
+void menuListar(struct item *inventario, int items) {
+  listarItens(inventario, items);
+}
+
+void menuBuscar(struct item *inventario, int items) {
+  char nomeBusca[30];
+  printf("Digite o nome do item a buscar: ");
+  // Clear any leftover newline from previous scanf
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF);
+  fgets(nomeBusca, sizeof(nomeBusca), stdin);
+  // Remove newline character
+  nomeBusca[strcspn(nomeBusca, "\n")] = 0;
+  buscarItem(inventario, nomeBusca);
+}
+
+void menuRemover(struct item *inventario, int *items) {
+  if (*items > 0) {
+    char nomeRemover[30];
+    printf("Digite o nome do item a ser removido: ");
+    // Clear any leftover newline from previous scanf
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+    fgets(nomeRemover, sizeof(nomeRemover), stdin);
+    // Remove newline character
+    nomeRemover[strcspn(nomeRemover, "\n")] = 0;
+    
+    int itemIndex = -1;
+    for (int i = 0; i < QTY_MAX_ITEMS; i++) {
+      if (inventario[i].quantidade > 0 && strcmp(inventario[i].nome, nomeRemover) == 0) {
+        itemIndex = i;
+        break;
+      }
+    }
+    
+    if (itemIndex != -1) {
+      printf("Item encontrado: %s (quantidade atual: %d)\n", inventario[itemIndex].nome, inventario[itemIndex].quantidade);
+      printf("Digite a quantidade a remover (0 para remover todos): ");
+      int quantidadeRemover;
+      scanf("%d", &quantidadeRemover);
+      
+      if (quantidadeRemover <= 0 || quantidadeRemover >= inventario[itemIndex].quantidade) {
+        // Remove all items
+        *items -= inventario[itemIndex].quantidade;
+        inventario[itemIndex].quantidade = 0;
+        printf("Item %s removido completamente do inventário\n", nomeRemover);
+      } else {
+        // Remove partial quantity
+        inventario[itemIndex].quantidade -= quantidadeRemover;
+        *items -= quantidadeRemover;
+        printf("Removidos %d unidades de %s (restam %d)\n", quantidadeRemover, nomeRemover, inventario[itemIndex].quantidade);
+      }
+    } else {
+      printf("Item não encontrado!\n");
+    }
+  } else {
+    printf("Nenhum item para remover!\n");
+  }
 }
 
