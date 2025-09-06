@@ -16,11 +16,12 @@ struct item inventario[QTY_MAX_ITEMS];
 void cadastrarItem(struct item *item, int items);
 void removerItem(struct item *item, int items);
 void listarItens(struct item *inventario, int items);
-void buscarItem(struct item *inventario, char *nome);
+void buscarItem(struct item *inventario, char *nome, int items);
 void menuCadastrar(struct item *inventario, int *items);
 void menuListar(struct item *inventario, int items);
 void menuBuscar(struct item *inventario, int items);
 void menuRemover(struct item *inventario, int *items);
+void ordenarItens(struct item *inventario, int items);
 
 int main() {
   int items = 0;
@@ -137,9 +138,22 @@ void listarItens(struct item *inventario, int items) {
   printf("Total de quantidade: %d\n\n", items);
 }
 
-void buscarItem(struct item *inventario, char *nome) {
-  for (int i = 0; i < QTY_MAX_ITEMS; i++) {
-    if (inventario[i].quantidade > 0 && strcmp(inventario[i].nome, nome) == 0) {
+// bubble sort
+void ordenarItens(struct item *inventario, int items) {
+  for (int i = 0; i < items - 1; i++) {
+    for (int j = 0; j < items - i - 1; j++) {
+      if (inventario[j].quantidade > inventario[j + 1].quantidade) {
+        struct item temp = inventario[j];
+        inventario[j] = inventario[j + 1];
+        inventario[j + 1] = temp;
+      }
+    }
+  }
+}
+
+void buscarItem(struct item *inventario, char *nome, int items) {
+  for (int i = 0; i < items; i++) {
+    if (strcmp(inventario[i].nome, nome) == 0) {
       printf("\n=== RESULTADO DA BUSCA ===\n");
       printf("%-30s %-20s %-10s\n", "NOME", "TIPO", "QUANTIDADE");
       printf("--------------------------------------------------------\n");
@@ -184,7 +198,24 @@ void menuBuscar(struct item *inventario, int items) {
   fgets(nomeBusca, sizeof(nomeBusca), stdin);
   // Remove newline character
   nomeBusca[strcspn(nomeBusca, "\n")] = 0;
-  buscarItem(inventario, nomeBusca);
+  
+  // Create a copy of the inventory for sorting
+  struct item inventarioOrdenado[QTY_MAX_ITEMS];
+  int itemsOrdenados = 0;
+  
+  // Copy only items with quantity > 0 to the sorted array
+  for (int i = 0; i < QTY_MAX_ITEMS; i++) {
+    if (inventario[i].quantidade > 0) {
+      inventarioOrdenado[itemsOrdenados] = inventario[i];
+      itemsOrdenados++;
+    }
+  }
+  
+  // Sort the copied inventory
+  ordenarItens(inventarioOrdenado, itemsOrdenados);
+  
+  // Search in the sorted inventory
+  buscarItem(inventarioOrdenado, nomeBusca, itemsOrdenados);
 }
 
 void menuRemover(struct item *inventario, int *items) {
