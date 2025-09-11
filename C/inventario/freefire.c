@@ -7,6 +7,7 @@ struct item {
   char nome[30];
   char tipo[20];
   int quantidade;
+  int prioridade;
 };
 
 #define QTY_MAX_ITEMS 10

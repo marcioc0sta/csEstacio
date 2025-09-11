@@ -1,0 +1,33 @@
+=== EXEMPLO DE USO DO SISTEMA DE TORRE DE FUGA ===
+
+Este arquivo demonstra como usar o sistema de priorização e montagem de componentes.
+
+COMPONENTES DE EXEMPLO PARA TESTE:
+1. Nome: "chip central", Tipo: "controle", Prioridade: 10
+2. Nome: "motor principal", Tipo: "propulsão", Prioridade: 9
+3. Nome: "sensor de altitude", Tipo: "controle", Prioridade: 8
+4. Nome: "tanque de combustível", Tipo: "suporte", Prioridade: 7
+5. Nome: "antena de comunicação", Tipo: "controle", Prioridade: 6
+6. Nome: "escudo térmico", Tipo: "proteção", Prioridade: 5
+7. Nome: "sistema de navegação", Tipo: "controle", Prioridade: 4
+8. Nome: "bateria auxiliar", Tipo: "suporte", Prioridade: 3
+9. Nome: "cabo de conexão", Tipo: "suporte", Prioridade: 2
+10. Nome: "parafuso de fixação", Tipo: "suporte", Prioridade: 1
+
+FLUXO DE TESTE RECOMENDADO:
+1. Cadastrar alguns componentes (ex: 5-10 componentes)
+2. Listar componentes para verificar o cadastro
+3. Testar cada algoritmo de ordenação:
+   - Bubble Sort por nome
+   - Insertion Sort por tipo  
+   - Selection Sort por prioridade
+4. Observar as comparações e tempos de execução
+5. Fazer busca binária por um componente-chave (ex: "chip central")
+6. Executar montagem final
+
+OBSERVAÇÕES IMPORTANTES:
+- A busca binária só funciona corretamente se o array estiver ordenado por nome
+- O sistema mostra o número de comparações para cada algoritmo
+- O tempo de execução é medido em segundos
+- Componentes com prioridade mais alta (10) aparecem primeiro no Selection Sort
+- O sistema suporta até 20 componentes
