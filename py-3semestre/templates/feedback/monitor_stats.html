@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Estatísticas - Monitor{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4"><i class="bi bi-graph-up"></i> Minhas Estatísticas</h2>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="bi bi-star-fill rating-stars"></i>
+                <h3>{{ overall_stats.avg_overall|floatformat:1|default:"0.0" }}</h3>
+                <p class="text-muted mb-0">Avaliação Geral</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="bi bi-calendar3"></i>
+                <h3>{{ total_sessions }}</h3>
+                <p class="text-muted mb-0">Sessões</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="bi bi-people"></i>
+                <h3>{{ total_students_served }}</h3>
+                <p class="text-muted mb-0">Alunos Atendidos</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="bi bi-clock"></i>
+                <h3>{{ avg_wait_time }}</h3>
+                <p class="text-muted mb-0">Tempo Médio (min)</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Avaliações Detalhadas</h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-star-fill rating-stars"></i> Geral</span>
+                            <strong>{{ overall_stats.avg_overall|floatformat:1|default:"0.0" }}/5</strong>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-warning" style="width: {{ overall_stats.avg_overall|default:0|floatformat:0|add:"0" }}0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-book"></i> Conhecimento</span>
+                            <strong>{{ overall_stats.avg_knowledge|floatformat:1|default:"0.0" }}/5</strong>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-primary" style="width: {{ overall_stats.avg_knowledge|default:0|floatformat:0|add:"0" }}0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-chat-dots"></i> Comunicação</span>
+                            <strong>{{ overall_stats.avg_communication|floatformat:1|default:"0.0" }}/5</strong>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-info" style="width: {{ overall_stats.avg_communication|default:0|floatformat:0|add:"0" }}0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-heart"></i> Paciência</span>
+                            <strong>{{ overall_stats.avg_patience|floatformat:1|default:"0.0" }}/5</strong>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" style="width: {{ overall_stats.avg_patience|default:0|floatformat:0|add:"0" }}0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Avaliações Recentes</h5>
+                    {% if recent_feedbacks %}
+                        <div class="list-group list-group-flush">
+                            {% for feedback in recent_feedbacks %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            {% if feedback.is_anonymous %}Anônimo{% else %}{{ feedback.student.get_full_name }}{% endif %}
+                                        </h6>
+                                        <small class="text-muted">{{ feedback.session.title }}</small>
+                                    </div>
+                                    <span class="badge bg-warning">{{ feedback.rating_overall }}/5</span>
+                                </div>
+                                {% if feedback.comment %}
+                                    <p class="mb-1 mt-2 small">{{ feedback.comment|truncatewords:15 }}</p>
+                                {% endif %}
+                                <small class="text-muted">{{ feedback.created_at|date:"d/m/Y" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhuma avaliação ainda.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

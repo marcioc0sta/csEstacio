@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Minhas Sessões{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-calendar3"></i> Minhas Sessões</h2>
+        <a href="{% url 'monitoring_sessions:create' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Nova Sessão
+        </a>
+    </div>
+    
+    {% if sessions %}
+        <div class="row g-4">
+            {% for session in sessions %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title">{{ session.title }}</h5>
+                            <span class="badge bg-{{ session.is_active|yesno:'success,secondary' }}">
+                                {{ session.is_active|yesno:'Ativo,Inativo' }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-book"></i> {{ session.subject.name }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="bi bi-calendar"></i> {{ session.get_weekday_display }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="bi bi-clock"></i> {{ session.get_time_range }}
+                        </p>
+                        <p class="mb-3">
+                            <i class="bi bi-geo-alt"></i> {{ session.location }}
+                        </p>
+                        
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'queue_management:session_queue' session.pk %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-list"></i> Fila
+                            </a>
+                            <a href="{% url 'monitoring_sessions:update' session.pk %}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a href="{% url 'monitoring_sessions:detail' session.pk %}" class="btn btn-sm btn-outline-primary">
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Você ainda não criou nenhuma sessão.
+            <a href="{% url 'monitoring_sessions:create' %}" class="alert-link">Criar primeira sessão</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

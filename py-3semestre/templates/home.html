@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Sistema de Monitoria{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-book"></i> Sistema de Monitoria Acadêmica 2.0
+        </h1>
+        <p class="lead mb-4">
+            Conectando alunos e monitores para uma experiência de aprendizado otimizada
+        </p>
+        {% if not user.is_authenticated %}
+            <div>
+                <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg me-2">
+                    <i class="bi bi-person-plus"></i> Cadastre-se
+                </a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </a>
+            </div>
+        {% else %}
+            <a href="{% url 'accounts:dashboard' %}" class="btn btn-light btn-lg">
+                <i class="bi bi-speedometer2"></i> Ir para Dashboard
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Features Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Agendamento Fácil</h5>
+                    <p class="card-text">
+                        Agende sessões de monitoria de forma simples e rápida
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-clock-history display-4 text-success mb-3"></i>
+                    <h5 class="card-title">Fila Dinâmica</h5>
+                    <p class="card-text">
+                        Sistema inteligente de fila de espera em tempo real
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <i class="bi bi-star-fill display-4 text-warning mb-3"></i>
+                    <h5 class="card-title">Avaliações</h5>
+                    <p class="card-text">
+                        Sistema completo de feedback e avaliação de monitores
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body p-4">
+                    <h3 class="card-title">
+                        <i class="bi bi-person-badge"></i> Para Alunos
+                    </h3>
+                    <p class="card-text">
+                        Encontre monitores qualificados, agende atendimentos, entre na fila 
+                        e tire suas dúvidas de forma eficiente.
+                    </p>
+                    <a href="{% url 'monitoring_sessions:list' %}" class="btn btn-light mt-2">
+                        Ver Sessões Disponíveis
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body p-4">
+                    <h3 class="card-title">
+                        <i class="bi bi-award"></i> Para Monitores
+                    </h3>
+                    <p class="card-text">
+                        Crie suas sessões, gerencie filas de atendimento, acompanhe estatísticas 
+                        e receba feedback dos alunos.
+                    </p>
+                    {% if user.is_authenticated and user.is_monitor %}
+                        <a href="{% url 'monitoring_sessions:create' %}" class="btn btn-light mt-2">
+                            Criar Nova Sessão
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light mt-2">
+                            Cadastre-se como Monitor
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

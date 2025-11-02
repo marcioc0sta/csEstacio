@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Disciplinas{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-book"></i> Disciplinas</h2>
+        {% if user.is_admin_user %}
+            <a href="{% url 'monitoring_sessions:subject_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Disciplina
+            </a>
+        {% endif %}
+    </div>
+    
+    {% if subjects %}
+        <div class="row g-3">
+            {% for subject in subjects %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ subject.name }}</h5>
+                        <p class="text-muted">Código: {{ subject.code }}</p>
+                        {% if subject.description %}
+                            <p class="card-text">{{ subject.description|truncatewords:20 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Nenhuma disciplina cadastrada.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

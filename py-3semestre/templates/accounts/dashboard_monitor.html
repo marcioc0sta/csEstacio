@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Monitor{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-award"></i> Dashboard do Monitor</h2>
+        <span class="badge bg-success">Monitor</span>
+    </div>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <i class="bi bi-calendar3"></i>
+                <h3>{{ my_sessions|length }}</h3>
+                <p class="text-muted mb-0">Sessões Ativas</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <a href="{% url 'monitoring_sessions:create' %}" class="text-decoration-none">
+                    <i class="bi bi-plus-circle"></i>
+                    <h3>Nova</h3>
+                    <p class="text-muted mb-0">Criar Sessão</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <a href="{% url 'feedback:my_feedbacks' %}" class="text-decoration-none">
+                    <i class="bi bi-star"></i>
+                    <h3>Ver</h3>
+                    <p class="text-muted mb-0">Avaliações</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <a href="{% url 'feedback:monitor_stats' %}" class="text-decoration-none">
+                    <i class="bi bi-graph-up"></i>
+                    <h3>Ver</h3>
+                    <p class="text-muted mb-0">Estatísticas</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Minhas Sessões</h5>
+                    {% if my_sessions %}
+                        <div class="row">
+                            {% for session in my_sessions %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ session.title }}</h6>
+                                        <p class="card-text text-muted mb-2">
+                                            <i class="bi bi-book"></i> {{ session.subject.name }}
+                                        </p>
+                                        <p class="card-text mb-2">
+                                            <i class="bi bi-calendar"></i> {{ session.get_weekday_display }}
+                                            <br>
+                                            <i class="bi bi-clock"></i> {{ session.get_time_range }}
+                                        </p>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'queue_management:session_queue' session.id %}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-list"></i> Ver Fila
+                                            </a>
+                                            <a href="{% url 'monitoring_sessions:update' session.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Você ainda não criou nenhuma sessão.</p>
+                        <a href="{% url 'monitoring_sessions:create' %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Criar Primeira Sessão
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

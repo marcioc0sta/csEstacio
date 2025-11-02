@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Minha Fila{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4"><i class="bi bi-clock-history"></i> Minha Fila de Atendimentos</h2>
+    
+    {% if entries %}
+        <div class="row g-4">
+            {% for entry in entries %}
+            <div class="col-lg-6">
+                <div class="card {% if entry.status == 'waiting' %}border-primary{% elif entry.status == 'in_service' %}border-success{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">{{ entry.topic }}</h5>
+                            <span class="badge bg-{% if entry.status == 'waiting' %}primary{% elif entry.status == 'in_service' %}success{% elif entry.status == 'completed' %}secondary{% else %}danger{% endif %}">
+                                {{ entry.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-muted mb-2">{{ entry.description|truncatewords:30 }}</p>
+                        
+                        <hr>
+                        
+                        <div class="mb-2">
+                            <p class="mb-1"><i class="bi bi-calendar3"></i> <strong>Sessão:</strong> {{ entry.session.title }}</p>
+                            <p class="mb-1"><i class="bi bi-person"></i> <strong>Monitor:</strong> {{ entry.session.monitor.get_full_name }}</p>
+                            <p class="mb-1"><i class="bi bi-calendar"></i> <strong>Entrada:</strong> {{ entry.created_at|date:"d/m/Y H:i" }}</p>
+                            
+                            {% if entry.status == 'waiting' %}
+                                <p class="mb-1"><i class="bi bi-hash"></i> <strong>Posição na fila:</strong> {{ entry.position }}</p>
+                            {% elif entry.status == 'completed' %}
+                                <p class="mb-1"><i class="bi bi-check-circle"></i> <strong>Concluído:</strong> {{ entry.completed_at|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-3">
+                            {% if entry.status == 'waiting' or entry.status == 'in_service' %}
+                                <a href="{% url 'queue_management:cancel' entry.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja cancelar?')">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                            {% elif entry.status == 'completed' %}
+                                {% if not entry.feedback %}
+                                    <a href="{% url 'feedback:submit' entry.id %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-star"></i> Avaliar Atendimento
+                                    </a>
+                                {% else %}
+                                    <span class="text-success">
+                                        <i class="bi bi-check-circle"></i> Avaliado
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Você não está em nenhuma fila no momento.
+            <a href="{% url 'monitoring_sessions:list' %}" class="alert-link">Encontrar sessões de monitoria</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

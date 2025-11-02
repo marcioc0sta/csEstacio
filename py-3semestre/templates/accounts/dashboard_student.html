@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Aluno{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2"></i> Dashboard do Aluno</h2>
+        <span class="badge bg-primary">Aluno</span>
+    </div>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <i class="bi bi-clock-history"></i>
+                <h3>{{ my_queue_entries|length }}</h3>
+                <p class="text-muted mb-0">Atendimentos</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <a href="{% url 'monitoring_sessions:list' %}" class="text-decoration-none">
+                    <i class="bi bi-calendar3"></i>
+                    <h3>Ver</h3>
+                    <p class="text-muted mb-0">Sessões Disponíveis</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <a href="{% url 'queue_management:my_queue' %}" class="text-decoration-none">
+                    <i class="bi bi-list-check"></i>
+                    <h3>Minha</h3>
+                    <p class="text-muted mb-0">Fila de Espera</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <a href="{% url 'feedback:my_feedbacks' %}" class="text-decoration-none">
+                    <i class="bi bi-star"></i>
+                    <h3>Minhas</h3>
+                    <p class="text-muted mb-0">Avaliações</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Últimos Atendimentos</h5>
+                    {% if my_queue_entries %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Sessão</th>
+                                        <th>Tópico</th>
+                                        <th>Status</th>
+                                        <th>Data</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in my_queue_entries %}
+                                    <tr>
+                                        <td>{{ entry.session.title }}</td>
+                                        <td>{{ entry.topic }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ entry.status|yesno:'success,warning,secondary' }}">
+                                                {{ entry.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ entry.created_at|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            {% if entry.status == 'completed' and not entry.feedback %}
+                                                <a href="{% url 'feedback:submit' entry.id %}" class="btn btn-sm btn-primary">
+                                                    Avaliar
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Você ainda não tem atendimentos.</p>
+                        <a href="{% url 'monitoring_sessions:list' %}" class="btn btn-primary">
+                            Encontrar Monitoria
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

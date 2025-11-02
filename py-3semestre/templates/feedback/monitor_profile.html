@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil - {{ monitor.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    {% if monitor.profile_picture %}
+                        <img src="{{ monitor.profile_picture.url }}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;" alt="Profile">
+                    {% else %}
+                        <i class="bi bi-person-circle display-1 text-primary"></i>
+                    {% endif %}
+                    <h3>{{ monitor.get_full_name }}</h3>
+                    <p class="text-muted">Monitor</p>
+                    
+                    {% if stats.avg_overall %}
+                        <div class="mb-3">
+                            <h2 class="rating-stars">{{ stats.avg_overall|floatformat:1 }}</h2>
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= stats.avg_overall|floatformat:0 %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">{{ stats.total_feedbacks }} avaliações</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Estatísticas</h5>
+                    <hr>
+                    {% if stats.avg_knowledge %}
+                        <p class="mb-2">
+                            <i class="bi bi-book"></i> Conhecimento: 
+                            <strong>{{ stats.avg_knowledge|floatformat:1 }}/5</strong>
+                        </p>
+                        <p class="mb-2">
+                            <i class="bi bi-chat-dots"></i> Comunicação: 
+                            <strong>{{ stats.avg_communication|floatformat:1 }}/5</strong>
+                        </p>
+                        <p class="mb-0">
+                            <i class="bi bi-heart"></i> Paciência: 
+                            <strong>{{ stats.avg_patience|floatformat:1 }}/5</strong>
+                        </p>
+                    {% else %}
+                        <p class="text-muted">Sem avaliações ainda</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Sessões Ativas</h5>
+                    {% if sessions %}
+                        <div class="row">
+                            {% for session in sessions %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>{{ session.title }}</h6>
+                                        <p class="mb-1 small"><i class="bi bi-book"></i> {{ session.subject.name }}</p>
+                                        <p class="mb-1 small"><i class="bi bi-calendar"></i> {{ session.get_weekday_display }}</p>
+                                        <p class="mb-0 small"><i class="bi bi-clock"></i> {{ session.get_time_range }}</p>
+                                        <a href="{% url 'monitoring_sessions:detail' session.id %}" class="btn btn-sm btn-outline-primary mt-2">
+                                            Ver Detalhes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhuma sessão ativa no momento.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Avaliações Recentes</h5>
+                    {% if feedbacks %}
+                        {% for feedback in feedbacks %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        {% if feedback.is_anonymous %}Anônimo{% else %}{{ feedback.student.get_full_name }}{% endif %}
+                                    </h6>
+                                    <small class="text-muted">{{ feedback.session.title }}</small>
+                                </div>
+                                <div class="rating-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= feedback.rating_overall %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if feedback.comment %}
+                                <p class="mt-2 mb-1">{{ feedback.comment }}</p>
+                            {% endif %}
+                            <small class="text-muted">{{ feedback.created_at|date:"d/m/Y" }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Nenhuma avaliação ainda.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

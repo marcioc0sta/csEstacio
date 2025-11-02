@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Fila - {{ session.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="mb-4">
+        <h2><i class="bi bi-list-check"></i> Fila de Atendimento</h2>
+        <p class="text-muted">{{ session.title }} - {{ session.monitor.get_full_name }}</p>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Waiting Queue -->
+        <div class="col-lg-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Aguardando ({{ waiting_entries|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if waiting_entries %}
+                        <div class="list-group">
+                            {% for entry in waiting_entries %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-1">
+                                        <span class="badge bg-secondary">{{ entry.position }}</span>
+                                        {{ entry.student.get_full_name }}
+                                    </h6>
+                                    <span class="badge bg-{{ entry.priority }}">
+                                        {{ entry.get_priority_display }}
+                                    </span>
+                                </div>
+                                <p class="mb-2"><strong>{{ entry.topic }}</strong></p>
+                                <p class="text-muted small mb-2">{{ entry.description|truncatewords:20 }}</p>
+                                <small class="text-muted">Entrou: {{ entry.created_at|date:"H:i" }}</small>
+                                <div class="mt-2">
+                                    <a href="{% url 'queue_management:start_service' entry.id %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-play-circle"></i> Iniciar Atendimento
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhum aluno aguardando.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- In Service -->
+        <div class="col-lg-6">
+            <div class="card border-success mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-check"></i> Em Atendimento ({{ in_service_entries|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if in_service_entries %}
+                        {% for entry in in_service_entries %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6>{{ entry.student.get_full_name }}</h6>
+                                <p class="mb-1"><strong>{{ entry.topic }}</strong></p>
+                                <p class="text-muted small mb-2">{{ entry.description }}</p>
+                                <small class="text-muted">Iniciado: {{ entry.started_at|date:"H:i" }}</small>
+                                <div class="mt-2">
+                                    <a href="{% url 'queue_management:complete_service' entry.id %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-check-circle"></i> Concluir Atendimento
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Nenhum atendimento em andamento.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Completed (Last 5) -->
+            <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-check-circle"></i> Concluídos Recentemente</h5>
+                </div>
+                <div class="card-body">
+                    {% if completed_entries %}
+                        <div class="list-group list-group-flush">
+                            {% for entry in completed_entries %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="mb-0">{{ entry.student.get_full_name }}</h6>
+                                        <small class="text-muted">{{ entry.topic }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ entry.completed_at|date:"H:i" }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Nenhum atendimento concluído hoje.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Auto-refresh every 30 seconds
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}
+{% endblock %}
+

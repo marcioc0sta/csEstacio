@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Ranking de Monitores{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4"><i class="bi bi-trophy-fill text-warning"></i> Ranking de Monitores</h1>
+        <p class="lead text-muted">Os melhores monitores avaliados pelos alunos</p>
+    </div>
+    
+    {% if monitor_stats %}
+        <div class="row g-4">
+            {% for stat in monitor_stats %}
+            <div class="col-lg-6">
+                <div class="card {% if forloop.counter == 1 %}border-warning{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                {% if forloop.counter == 1 %}
+                                    <span class="badge bg-warning text-dark fs-4">
+                                        <i class="bi bi-trophy-fill"></i> 1º
+                                    </span>
+                                {% elif forloop.counter == 2 %}
+                                    <span class="badge bg-secondary fs-4">2º</span>
+                                {% elif forloop.counter == 3 %}
+                                    <span class="badge bg-light text-dark fs-4">3º</span>
+                                {% else %}
+                                    <span class="badge bg-light text-muted fs-4">{{ forloop.counter }}º</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">
+                                    <a href="{% url 'feedback:monitor_profile' stat.monitor.id %}" class="text-decoration-none">
+                                        {{ stat.monitor.get_full_name }}
+                                    </a>
+                                </h5>
+                                {% if stat.monitor.course %}
+                                    <small class="text-muted">{{ stat.monitor.course }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="text-end">
+                                <h3 class="mb-0 rating-stars">
+                                    <i class="bi bi-star-fill"></i> {{ stat.avg_rating }}
+                                </h3>
+                                <small class="text-muted">{{ stat.total_feedbacks }} avaliações</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> Ainda não há monitores avaliados.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
