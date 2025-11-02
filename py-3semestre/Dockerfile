@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     libpq-dev \
     gcc \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -31,6 +32,10 @@ RUN python manage.py collectstatic --noinput || true
 # Expose port
 EXPOSE 8000
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "monitoria_system.wsgi:application"]
+CMD ["sh", "/app/docker-entrypoint.sh"]
 

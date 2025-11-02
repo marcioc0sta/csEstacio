@@ -4,10 +4,15 @@
 set -e
 
 echo "Waiting for PostgreSQL to be ready..."
-while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
-    sleep 0.1
-done
-echo "PostgreSQL is ready!"
+# Only wait if POSTGRES_HOST is set (Docker Compose)
+if [ -n "$POSTGRES_HOST" ]; then
+    while ! nc -z $POSTGRES_HOST $POSTGRES_PORT; do
+        sleep 0.1
+    done
+    echo "PostgreSQL is ready!"
+else
+    echo "No POSTGRES_HOST set, assuming external database (Render/Railway)"
+fi
 
 echo "Running migrations..."
 python manage.py migrate --noinput
