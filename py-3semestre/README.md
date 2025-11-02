@@ -47,23 +47,152 @@ Sistema completo desenvolvido em Django para gerenciamento de sessões de monito
 - Gradientes e animações suaves
 - UX otimizada
 
+---
+
 ## 📋 Requisitos
 
-- Python 3.8+
-- Django 4.2+
-- SQLite (desenvolvimento) / PostgreSQL (produção)
+- **Docker** 20.10+ (recomendado)
+- **Docker Compose** 2.0+ (recomendado)
+- OU Python 3.8+ e PostgreSQL (instalação manual)
 
-## 🔧 Instalação e Configuração
+---
 
-### 1. Clone o repositório
+## 🐳 Instalação com Docker (Recomendado)
+
+### Pré-requisitos
+Certifique-se de ter o Docker e Docker Compose instalados:
+
+```bash
+# Verificar versões
+docker --version
+docker-compose --version
+```
+
+### Quick Start
+
+1. **Clone o repositório:**
 ```bash
 cd py-3semestre
 ```
 
-### 2. Crie um ambiente virtual
+2. **Execute o script de inicialização:**
 ```bash
+chmod +x docker-start.sh
+./docker-start.sh
+```
+
+O script irá:
+- ✅ Verificar se o Docker está rodando
+- ✅ Perguntar se deseja reconstruir as imagens
+- ✅ Iniciar os containers (PostgreSQL, Django, Nginx)
+- ✅ Aplicar migrações do banco de dados
+- ✅ Carregar dados de teste (opcional)
+- ✅ Coletar arquivos estáticos
+
+3. **Acesse a aplicação:**
+```
+🌐 Frontend: http://localhost
+📊 Admin:    http://localhost/admin
+```
+
+### Credenciais de Teste
+
+Após carregar os dados de teste:
+
+```
+👨‍💼 Administrador:
+   Usuário: admin
+   Senha:   admin123
+
+👨‍🏫 Monitor:
+   Usuário: monitor1
+   Senha:   monitor123
+
+👨‍🎓 Aluno:
+   Usuário: aluno1
+   Senha:   aluno123
+```
+
+### Comandos Docker Úteis
+
+#### Gerenciamento de Containers
+
+```bash
+# Ver logs em tempo real
+docker-compose logs -f
+
+# Ver logs apenas do web
+docker-compose logs -f web
+
+# Ver status dos containers
+docker-compose ps
+
+# Reiniciar um serviço específico
+docker-compose restart web
+```
+
+#### Banco de Dados
+
+```bash
+# Acessar shell do banco PostgreSQL
+docker-compose exec db psql -U monitoria_user -d monitoria_db
+
+# Criar novas migrations
+docker-compose run --rm web python manage.py makemigrations
+
+# Aplicar migrations
+docker-compose run --rm web python manage.py migrate
+
+# Carregar dados de teste novamente
+docker-compose run --rm web python setup_project.py
+```
+
+#### Manutenção
+
+```bash
+# Parar containers (mantém dados)
+docker-compose stop
+
+# Parar e remover containers
+docker-compose down
+
+# Parar e remover TUDO (incluindo volumes/dados)
+docker-compose down -v
+
+# Reconstruir sem cache
+docker-compose build --no-cache
+
+# Executar comandos Django
+docker-compose run --rm web python manage.py <comando>
+
+# Criar superusuário
+docker-compose run --rm web python manage.py createsuperuser
+```
+
+#### Scripts de Ajuda
+
+```bash
+# Iniciar aplicação (automático)
+./docker-start.sh
+
+# Parar aplicação (automático)
+./docker-stop.sh
+```
+
+---
+
+## 💻 Instalação Manual (Sem Docker)
+
+### 1. Configure o Ambiente
+
+```bash
+# Clone o repositório
+cd py-3semestre
+
+# Crie ambiente virtual
 python -m venv venv
 
+# Ative o ambiente virtual
 # Windows
 venv\Scripts\activate
 
@@ -71,122 +200,51 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### 3. Instale as dependências
+### 2. Instale Dependências
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Execute as migrações
+### 3. Configure o Banco de Dados
+
+Crie um banco PostgreSQL e configure as variáveis de ambiente:
+
+```bash
+# Exemplo de .env
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/monitoria_db
+SECRET_KEY=seu-secret-key-aqui
+DEBUG=True
+```
+
+### 4. Execute Migrations
+
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 5. Crie um superusuário (admin)
+### 5. Carregue Dados de Teste
+
 ```bash
-python manage.py createsuperuser
+python setup_project.py
 ```
 
-### 6. Carregue dados de teste (opcional)
+### 6. Colete Arquivos Estáticos
+
 ```bash
-python manage.py shell
+python manage.py collectstatic --noinput
 ```
 
-Então execute:
-```python
-from django.contrib.auth import get_user_model
-from sessions.models import Subject, MonitoringSession
-from datetime import time
+### 7. Inicie o Servidor
 
-User = get_user_model()
-
-# Criar usuários de teste
-admin = User.objects.create_superuser(
-    username='admin',
-    email='admin@monitoria.com',
-    password='admin123',
-    first_name='Admin',
-    last_name='Sistema',
-    role='admin'
-)
-
-monitor1 = User.objects.create_user(
-    username='monitor1',
-    email='monitor1@monitoria.com',
-    password='monitor123',
-    first_name='João',
-    last_name='Silva',
-    role='monitor',
-    registration_number='M001',
-    course='Ciência da Computação',
-    semester=6
-)
-
-student1 = User.objects.create_user(
-    username='aluno1',
-    email='aluno1@monitoria.com',
-    password='aluno123',
-    first_name='Maria',
-    last_name='Santos',
-    role='student',
-    registration_number='A001',
-    course='Ciência da Computação',
-    semester=3
-)
-
-# Criar disciplinas
-disciplina1 = Subject.objects.create(
-    name='Estruturas de Dados',
-    code='CC101',
-    description='Listas, pilhas, filas, árvores e grafos'
-)
-
-disciplina2 = Subject.objects.create(
-    name='Banco de Dados',
-    code='CC201',
-    description='SQL, modelagem e otimização'
-)
-
-# Criar sessão de monitoria
-sessao1 = MonitoringSession.objects.create(
-    monitor=monitor1,
-    subject=disciplina1,
-    title='Monitoria de Estruturas de Dados',
-    description='Atendimento para dúvidas em estruturas de dados',
-    location='Sala 201 - Laboratório',
-    weekday=1,  # Terça-feira
-    start_time=time(14, 0),
-    end_time=time(16, 0),
-    max_students=15,
-    status='scheduled',
-    is_active=True
-)
-
-print("Dados de teste criados com sucesso!")
-```
-
-### 7. Execute o servidor
 ```bash
 python manage.py runserver
 ```
 
 Acesse: `http://localhost:8000`
 
-## 👥 Credenciais de Teste
-
-Após carregar os dados de teste, você pode usar:
-
-### Administrador
-- **Usuário:** admin
-- **Senha:** admin123
-
-### Monitor
-- **Usuário:** monitor1
-- **Senha:** monitor123
-
-### Aluno
-- **Usuário:** aluno1
-- **Senha:** aluno123
+---
 
 ## 📱 Como Usar
 
@@ -211,6 +269,8 @@ Após carregar os dados de teste, você pode usar:
 3. Visualize estatísticas gerais
 4. Crie novas disciplinas
 
+---
+
 ## 🗂️ Estrutura do Projeto
 
 ```
@@ -219,11 +279,11 @@ py-3semestre/
 │   ├── models.py         # Modelo CustomUser com roles
 │   ├── views.py          # Login, registro, perfis
 │   └── forms.py          # Formulários de autenticação
-├── sessions/              # App de sessões de monitoria
+├── monitoring_sessions/   # App de sessões de monitoria
 │   ├── models.py         # Sessões, disciplinas, presença
 │   ├── views.py          # CRUD de sessões
 │   └── forms.py          # Formulários de sessão
-├── queue/                 # App de fila de atendimento
+├── queue_management/      # App de fila de atendimento
 │   ├── models.py         # Fila dinâmica
 │   ├── views.py          # Gerenciamento de fila
 │   └── forms.py          # Entrada na fila
@@ -235,59 +295,107 @@ py-3semestre/
 │   ├── base.html         # Template base
 │   ├── home.html         # Página inicial
 │   ├── accounts/         # Templates de usuário
-│   ├── sessions/         # Templates de sessões
-│   ├── queue/            # Templates de fila
+│   ├── monitoring_sessions/  # Templates de sessões
+│   ├── queue_management/     # Templates de fila
 │   └── feedback/         # Templates de feedback
 ├── monitoria_system/      # Configurações do projeto
 │   ├── settings.py       # Configurações Django
 │   └── urls.py           # URLs principais
+├── docker-compose.yml    # Configuração Docker
+├── Dockerfile            # Imagem Docker
+├── docker-start.sh       # Script de inicialização
+├── docker-stop.sh        # Script de parada
+├── nginx.conf            # Configuração Nginx
 ├── manage.py
 ├── requirements.txt
 └── README.md
 ```
 
+---
+
 ## 🎨 Tecnologias Utilizadas
 
 - **Backend:** Django 4.2
 - **Frontend:** Bootstrap 5, Bootstrap Icons
-- **Banco de Dados:** SQLite (dev) / PostgreSQL (prod)
+- **Banco de Dados:** PostgreSQL
+- **Web Server:** Nginx
+- **WSGI Server:** Gunicorn
+- **Containerização:** Docker, Docker Compose
 - **Autenticação:** Django Auth System
-- **Deployment:** Gunicorn, WhiteNoise
 
-## 🚀 Deploy
+---
 
-### Heroku
+## 🚀 Deploy em Produção
 
-1. Instale o Heroku CLI
-2. Crie um app no Heroku:
-```bash
-heroku create nome-do-app
+### Configurar Variáveis de Ambiente
+
+Edite o `docker-compose.yml` para produção:
+
+```yaml
+environment:
+  - DEBUG=False
+  - SECRET_KEY=<sua-chave-secreta-forte>
+  - ALLOWED_HOSTS=seu-dominio.com,www.seu-dominio.com
+  - DATABASE_URL=postgresql://...
 ```
 
-3. Configure o PostgreSQL:
+### Usar Nginx em Produção
+
 ```bash
-heroku addons:create heroku-postgresql:mini
+# Iniciar com perfil de produção
+docker-compose --profile production up -d
+
+# Isso iniciará também o Nginx
 ```
 
-4. Configure as variáveis de ambiente:
+### Backup do Banco de Dados
+
 ```bash
-heroku config:set DEBUG=False
-heroku config:set SECRET_KEY='sua-chave-secreta'
+# Fazer backup
+docker-compose exec db pg_dump -U monitoria_user monitoria_db > backup.sql
+
+# Restaurar backup
+docker-compose exec -T db psql -U monitoria_user monitoria_db < backup.sql
 ```
 
-5. Deploy:
+### Monitoramento
+
 ```bash
-git push heroku main
-heroku run python manage.py migrate
-heroku run python manage.py createsuperuser
+# Ver uso de recursos
+docker stats
+
+# Ver logs de erro
+docker-compose logs --tail=100 web | grep ERROR
 ```
 
-### Render
+---
 
-1. Crie uma conta no Render
-2. Conecte seu repositório GitHub
-3. Configure as variáveis de ambiente
-4. O deploy será automático
+## 🔧 Desenvolvimento
+
+### Adicionar Novos Pacotes
+
+```bash
+# Instalar novo pacote
+docker-compose run --rm web pip install <pacote>
+
+# Atualizar requirements.txt
+docker-compose run --rm web pip freeze > requirements.txt
+```
+
+### Debugging
+
+```bash
+# Entrar no container
+docker-compose exec web sh
+
+# Executar shell Django
+docker-compose run --rm web python manage.py shell
+
+# Verificar logs de erros
+docker-compose logs web | grep -i error
+```
+
+---
 
 ## 📊 Funcionalidades Técnicas
 
@@ -296,12 +404,14 @@ heroku run python manage.py createsuperuser
 - Autenticação baseada em sessão
 - Senhas hasheadas com PBKDF2
 - Permissões baseadas em roles
+- Variáveis de ambiente para secrets
 
 ### Performance
 - Queries otimizadas com select_related
 - Paginação em listagens
-- Static files com WhiteNoise
+- Static files servidos via Nginx
 - Cache-Control headers
+- PostgreSQL como banco principal
 
 ### Boas Práticas
 - Código organizado em apps
@@ -309,6 +419,10 @@ heroku run python manage.py createsuperuser
 - Forms validation
 - Messages framework
 - Responsive design
+- Docker containerização
+- Health checks
+
+---
 
 ## 🤝 Contribuindo
 
@@ -322,11 +436,6 @@ Este projeto foi desenvolvido para fins educacionais.
 
 Desenvolvido como trabalho individual da disciplina de Desenvolvimento Web com Django.
 
-## 📧 Contato
-
-Para dúvidas ou sugestões, entre em contato através do sistema.
-
 ---
 
 **Sistema de Gestão de Monitoria Acadêmica 2.0** - Otimizando o aprendizado colaborativo! 📚✨
-
